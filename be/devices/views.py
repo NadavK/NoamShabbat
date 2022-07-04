@@ -4,11 +4,10 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.http import Http404
-from rest_framework import viewsets, status, mixins
+from rest_framework import viewsets, mixins
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
-from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from devices.models import Device
