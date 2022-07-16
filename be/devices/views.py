@@ -59,7 +59,7 @@ class DeviceViewSet(mixins.CreateModelMixin,
         raise MethodNotAllowed(request.method)
 
     def perform_create(self, serializer):
-        serializer.validated_data['last_reported_time'] = timezone.now()
+        serializer.validated_data['last_health_time'] = timezone.now()
 
         # Set default name
         serializer.validated_data['name'] = 'חדש ' + serializer.validated_data['sn']
@@ -67,7 +67,7 @@ class DeviceViewSet(mixins.CreateModelMixin,
         super().perform_create(serializer)
 
     def perform_update(self, serializer):
-        serializer.validated_data['last_reported_time'] = timezone.now()
+        serializer.validated_data['last_health_time'] = timezone.now()
         super().perform_update(serializer)
 
     # /devices/health with sn in payload
@@ -90,3 +90,15 @@ class DeviceViewSet(mixins.CreateModelMixin,
             self.logger.exception('Failed to update: %s', request.data)
             raise e
         return response
+
+
+from django.shortcuts import render
+def geeks_view(request):
+    # create a dictionary to pass
+    # data to the template
+    context ={
+        "data":"Gfg is the best",
+        "list":[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    }
+    # return response with template and context
+    return render(request, "geeks.html", context)

@@ -40,8 +40,8 @@ class DeviceHealthSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Device
         lookup_field = 'sn'
-        fields = ['sn', 'ip', 'device_config_time', 'last_reported_time']
-        read_only = ['last_reported_time']
+        fields = ['sn', 'ip', 'device_config_time', 'last_health_time']
+        read_only = ['last_health_time']
 
     def validate_sn(self, value):
         """
