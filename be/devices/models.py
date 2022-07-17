@@ -6,7 +6,7 @@ from django.db import models
 from devices import managers
 
 
-class DeviceGroup(models.Model):
+class Group(models.Model):
     class Meta:
         verbose_name = 'קבוצה'
         verbose_name_plural = 'קבוצות'
@@ -42,8 +42,8 @@ class Device(models.Model):
     device_config_time = models.DateTimeField(blank=True, null=True, verbose_name='זמן הגדרות בבקר', help_text='הזמן של הגדרות בבקר עצמה')
     reported_device_config_time = models.DateTimeField(blank=True, null=True, verbose_name='זמן קבלה אחרון', help_text='הזמן שהבקר דיווחה על קבלת ההגדרות')
     last_health_time = models.DateTimeField(blank=True, null=True, verbose_name='זמן דיווח אחרון', help_text='הזמן האחרון שהבקר דווחה על חיבוריות')
-    group = models.ForeignKey(DeviceGroup, blank=True, null=True, on_delete=models.PROTECT, verbose_name='קבוצה', help_text='קבוצה של בקרים')
-    #files = models.ForeignKey(DeviceGroup, blank=True, null=True, on_delete=models.PROTECT, verbose_name='קבוצה', help_text='קבוצה של בקרים')
+    group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.PROTECT, verbose_name='קבוצה', help_text='קבוצה של בקרים')
+    #files = models.ForeignKey(Group, blank=True, null=True, on_delete=models.PROTECT, verbose_name='קבוצה', help_text='קבוצה של בקרים')
 
     #files = GenericRelation(File)
 

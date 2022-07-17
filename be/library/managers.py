@@ -2,7 +2,7 @@ from django.db import models
 import logging
 
 
-class DeviceGroupFileManager(models.Manager):
+class GroupFileManager(models.Manager):
     logger = logging.getLogger(__name__)
 
 
@@ -10,7 +10,7 @@ class DeviceFileManager(models.Manager):
     logger = logging.getLogger(__name__)
 
 
-class DeviceGroupHolidayManager(models.Manager):
+class GroupHolidayManager(models.Manager):
     logger = logging.getLogger(__name__)
 
 

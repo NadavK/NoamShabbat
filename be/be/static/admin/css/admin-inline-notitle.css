@@ -1,0 +1,22 @@
+.inline-related h3 {
+    padding-top: 0px;
+    display: none;
+}
+
+.inline-related h2, .inline-group h2 {
+    padding-top: 0px;
+    display: none;
+}
+
+.inline-group thead th {
+    padding-top: 0px;
+    display: none;
+}
+
+.inline-group .tabular tr.has_original td {
+    padding-top: 0px;
+}
+
+.original {
+    display: none;
+}

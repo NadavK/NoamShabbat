@@ -4,7 +4,7 @@ from django.db import models
 from django.forms import forms
 from django.utils.translation import gettext_lazy as _
 
-from devices.models import DeviceGroup, Device
+from devices.models import Group, Device
 from library import managers
 
 
@@ -19,7 +19,7 @@ class Holiday(models.Model):
         return self.name
 
 
-class InheritDeviceGroupFilesPerHoliday(models.Model):
+class InheritGroupFilesPerHoliday(models.Model):
     class Meta:
         verbose_name = 'השמעת שירים מהקבוצה'
         verbose_name_plural = 'השמעת שירים מהקבוצה'
@@ -65,51 +65,55 @@ class File(models.Model):
         return self.file.name
 
 
-class DeviceGroupFile(File):
+class GroupFile(File):
     class Meta:
-        verbose_name = 'שיר בקבוצה'
-        verbose_name_plural = 'שירים בקבוצה'
+        verbose_name = 'שיר-קבוצה'
+        verbose_name_plural = 'שירי-קבוצה'
 
-    objects = managers.DeviceGroupFileManager()
+    objects = managers.GroupFileManager()
 
-    #group = models.ForeignKey(DeviceGroup, on_delete=models.PROTECT, verbose_name='קבוצה', help_text='שיוך לקבוצה')
-    device_group_holiday = models.ForeignKey('DeviceGroupHoliday', blank=True, null=True, on_delete=models.SET_NULL)
+    #group = models.ForeignKey(Group, on_delete=models.PROTECT, verbose_name='קבוצה', help_text='שיוך לקבוצה')
+    group_holiday = models.OneToOneField('GroupHolidayFile', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class DeviceFile(File):
     class Meta:
-        verbose_name = 'שיר בבקר'
-        verbose_name_plural = 'שירים בבקר'
+        verbose_name = 'שיר-בקר'
+        verbose_name_plural = 'שירי-בקר'
 
     objects = managers.DeviceFileManager()
 
     #device = models.ForeignKey(Device, on_delete=models.PROTECT, verbose_name='בקר', help_text='שיוך לבקר')
-    device_holiday = models.ForeignKey('DeviceHoliday', blank=True, null=True, on_delete=models.SET_NULL)
+    device_holiday = models.OneToOneField('DeviceHolidayFile', blank=True, null=True, on_delete=models.SET_NULL, verbose_name='חג-בקר')#, help_text='שיוך לבקר')
 
 
-class DeviceGroupHoliday(models.Model):
+class GroupHolidayFile(models.Model):
     class Meta:
-        verbose_name = 'שירי קבוצה'
-        verbose_name_plural = 'שירי קבוצות'
+        verbose_name = 'קבוצה-שיר-חג'
+        verbose_name_plural = 'קבוצה-שיר-חג'
 
-    objects = managers.DeviceGroupHolidayManager()
+    objects = managers.GroupHolidayManager()
 
-    group = models.ForeignKey(DeviceGroup, on_delete=models.PROTECT, verbose_name='קבוצה', help_text='שיוך לקבוצה')
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, verbose_name='קבוצה', help_text='שיוך לקבוצה')
     holiday = models.ForeignKey(Holiday, on_delete=models.PROTECT, verbose_name='חג', help_text='מתי לנגן')
+    #group_file = models.OneToOneField(GroupFile, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='שיר-בקר')#, help_text='שיוך לבקר')
 
     def __str__(self):
         return "%s - %s" % (self.group, self.holiday)
 
 
-class DeviceHoliday(models.Model):
+class DeviceHolidayFile(models.Model):
     class Meta:
-        verbose_name = 'שירי בקר'
-        verbose_name_plural = 'שירי בקר'
+        verbose_name = 'בקר-שיר-חג'
+        verbose_name_plural = 'בקר-שיר-חג'
+
+    #unique_together = ['device', 'holiday']
 
     objects = managers.DeviceHolidayManager()
 
     device = models.ForeignKey(Device, on_delete=models.PROTECT, verbose_name='בקר', help_text='שיוך לבקר')
     holiday = models.ForeignKey(Holiday, on_delete=models.PROTECT, verbose_name='חג', help_text='מתי לנגן')
+    #device_file = models.OneToOneField(DeviceFile, blank=True, null=True, on_delete=models.SET_NULL, verbose_name='שיר-בקר')#, help_text='שיוך לבקר')
 
     def __str__(self):
         return "%s - %s" % (self.device, self.holiday)

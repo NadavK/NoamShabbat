@@ -17,18 +17,18 @@ from django.utils.safestring import mark_safe
 from nested_admin.nested import NestedModelAdmin, NestedStackedInline, NestedTabularInline
 
 from devices.forms import DeviceRealtimeForm
-from devices.models import Device, DeviceGroup
-from library.models import File, DeviceFile, DeviceGroupFile, Holiday, InheritDeviceGroupFilesPerHoliday, \
-    DeviceGroupHoliday
+from devices.models import Device, Group
+from library.models import File, DeviceFile, GroupFile, Holiday, InheritGroupFilesPerHoliday, \
+    GroupHolidayFile, DeviceHolidayFile
 
 
-class DeviceGroupInline(TabularInline):
-    model = DeviceGroup
+class GroupInline(TabularInline):
+    model = Group
     extra = 1
 
 
-class DeviceGroupFileInline(TabularInline):
-    model = DeviceGroupFile
+class GroupFileInline(TabularInline):
+    model = GroupFile
     extra = 1
     # def get_formset(self, request, obj=None, **kwargs):
     #     return super().get_formset(request, obj, kwargs)
@@ -62,20 +62,20 @@ class DeviceFileInlineFormSet(BaseInlineFormSet):
         return extended_holidays
 
 
-class DeviceFileInline(TabularInline):
+class DeviceFileInline(NestedTabularInline):
     model = DeviceFile
     extra = 1
     show_change_link = True
     # def get_formset(self, request, obj=None, **kwargs):
     #     return super().get_formset(request, obj, kwargs)
     #fields = ('groupfile', 'file', 'description', 'notes', 'holiday', 'placement', 'active', 'override')
-    fields = ('holiday', 'placement', 'groupfile', 'file', 'active')
-    readonly_fields = ('groupfile', 'holiday', 'placement')
-    #formset = DeviceFileInlineFormSet
-
-    def groupfile(self, obj):
-        devicefiles = DeviceFile.objects.filter(holiday=obj.holiday, placement=obj.placement)
-        return devicefiles.values_list('file')
+    # fields = ('holiday', 'placement', 'groupfile', 'file', 'active')
+    # readonly_fields = ('groupfile', 'holiday', 'placement')
+    # #formset = DeviceFileInlineFormSet
+    #
+    # def groupfile(self, obj):
+    #     devicefiles = DeviceFile.objects.filter(holiday=obj.holiday, placement=obj.placement)
+    #     return devicefiles.values_list('file')
 
 # class MergedFileInline(admin.TabularInline):
 #     model = File
@@ -94,17 +94,17 @@ class DeviceFileInline(TabularInline):
 
 
 
-class DeviceGroupFileInlineNonRelated(NestedTabularInline):
-    model = DeviceGroupFile
+class GroupFileInline(NestedTabularInline):
+    model = GroupFile
     extra = 0
     exclude = ('group', 'holiday')
 
-    def get_form_queryset(self, obj):
-        return self.model.objects.filter(holiday=obj, group__pk=obj.devicegroup_pk)
-
-    def save_new_instance(self, parent, instance):
-        # instance.email = parent.email
-        pass
+    # def get_form_queryset(self, obj):
+    #     return self.model.objects.filter(holiday=obj, group__pk=obj.devicegroup_pk)
+    #
+    # def save_new_instance(self, parent, instance):
+    #     # instance.email = parent.email
+    #     pass
 
 
 # class DeviceFileInlineNonRelated(NestedTabularInline, NonrelatedTabularInline):
@@ -120,8 +120,8 @@ class DeviceGroupFileInlineNonRelated(NestedTabularInline):
 #         pass
 
 
-class InheritDeviceGroupFilesPerHolidayInlineNested(NestedStackedInline):
-    model = InheritDeviceGroupFilesPerHoliday
+class InheritGroupFilesPerHolidayInlineNested(NestedStackedInline):
+    model = InheritGroupFilesPerHoliday
     extra = 1
     max_num = 1
     exclude = ('device',)
@@ -138,7 +138,7 @@ class InheritDeviceGroupFilesPerHolidayInlineNested(NestedStackedInline):
 
 
 class HolidayInline(NestedStackedInline):
-    model = DeviceGroupHoliday
+    model = GroupHolidayFile
 
 
 class HolidayInline(NestedStackedInline):
@@ -153,13 +153,16 @@ class HolidayInline(NestedStackedInline):
         # instance.email = parent.email
         pass
 
-class DeviceGroupHoliday2(DeviceGroupHoliday):
+
+# Used to hide the title and field prefix
+class GroupHolidayFileNoTitle(GroupHolidayFile):
     class Meta:
         proxy = True
         verbose_name = ''
         verbose_name_plural = ''
 
-class DeviceGroupHolidayInline(NestedStackedInline):
+
+class GroupHolidayInline(NestedStackedInline):
     @admin.display(description='')
     def holiday_nolink(self, obj):
         return format_html(
@@ -167,10 +170,10 @@ class DeviceGroupHolidayInline(NestedStackedInline):
             obj.holiday.name
         )
 
-    model = DeviceGroupHoliday2
-    inlines = [DeviceGroupFileInlineNonRelated]
+    model = GroupHolidayFileNoTitle
+    inlines = [GroupFileInline]
     can_delete = False
-    #readonly_fields = ('holiday_nolink', )
+    readonly_fields = ('holiday_nolink', )
     exclude = ('holiday',)
     list_display_links = ('None',)
     is_sortable = False
@@ -202,22 +205,22 @@ class DeviceGroupHolidayInline(NestedStackedInline):
             return super().get_queryset(request)
 
         parent = self.get_parent_object_from_request(request)
-        existing_holidays = DeviceGroupHoliday.objects.values('holiday').distinct()
-        device_group_holidays = []
+        existing_holidays = GroupHolidayFile.objects.values_list('holiday', flat=True).distinct()
+        group_holidays = []
         for holiday in Holiday.objects.all():
-            if holiday not in existing_holidays:
-                device_group_holiday = DeviceGroupHoliday(holiday=holiday, group=parent)
-                device_group_holidays.append(device_group_holiday)
-        device_group_holidays = DeviceGroupHoliday.objects.bulk_create(device_group_holidays)
+            if holiday.pk not in existing_holidays:
+                group_holiday = GroupHolidayFile(holiday=holiday, group=parent)
+                group_holidays.append(group_holiday)
+        group_holidays = GroupHolidayFile.objects.bulk_create(group_holidays)
 
         # files = []
-        # for file in DeviceGroupFile.objects.filter(group=parent):
-        #     file.device_group_holiday = DeviceGroupHoliday.objects.get(holiday=file.holiday, group=parent)
+        # for file in GroupFile.objects.filter(group=parent):
+        #     file.group_holiday = GroupHoliday.objects.get(holiday=file.holiday, group=parent)
         #     files.append(file)
-        # DeviceGroupFile.objects.bulk_update(files, ['device_group_holiday'])
+        # GroupFile.objects.bulk_update(files, ['group_holiday'])
 
-        return DeviceGroupHoliday.objects.all()
-        #return device_group_holidays
+        return GroupHolidayFile.objects.all()
+        #return group_holidays
         # super().get_queryset(request)
 
     # def get_search_results(self, request, queryset, search_term):
@@ -232,19 +235,79 @@ class DeviceGroupHolidayInline(NestedStackedInline):
     #         queryset |= self.model.objects.filter(age=search_term_as_int)
     #     return queryset, may_have_duplicates
 
+# Used to hide the title and field prefix
+class DeviceHolidayFileNoTitle(DeviceHolidayFile):
+    class Meta:
+        proxy = True
+        verbose_name = ''
+        verbose_name_plural = ''
 
+
+class DeviceHolidayInline(NestedStackedInline):
+    @admin.display(description='')
+    def holiday_nolink(self, obj):
+        return format_html(
+            '<b style="font-weight: bold;font-size: large;">{}</b>',
+            obj.holiday.name
+        )
+
+    model = DeviceHolidayFileNoTitle
+    inlines = [DeviceFileInline]
+    can_delete = False
+    readonly_fields = ('holiday_nolink', 'group_files')
+    exclude = ('holiday',)
+    list_display_links = ('None',)
+    is_sortable = False
+
+    @admin.display(description='שירי-קבוצה')
+    def group_files(self, obj):
+        html = ''
+        group = obj.device.group
+        holiday = obj.holiday
+        group_holidays = GroupHolidayFile.objects.filter(group=group, holiday=holiday)
+        for file in GroupFile.objects.filter(group_holiday__in=group_holidays):
+            html += format_html(
+                '{}<BR>',
+                file.description
+            )
+        return format_html(html)
+
+    def get_parent_object_from_request(self, request):
+        """
+        Returns the parent object from the request or None.
+
+        Note that this only works for Inlines, because the `parent_model`
+        is not available in the regular admin.ModelAdmin as an attribute.
+        """
+        resolved = resolve(request.path_info)
+        if resolved.kwargs:
+            return self.parent_model.objects.get(pk=resolved.kwargs["object_id"])
+        return None
+
+    def get_queryset(self, request):
+        if request.method == 'POST':
+            return super().get_queryset(request)
+
+        parent = self.get_parent_object_from_request(request)
+        existing_holidays = DeviceHolidayFile.objects.values_list('holiday', flat=True).distinct()
+        device_holidays = []
+        for holiday in Holiday.objects.all():
+            if holiday.pk not in existing_holidays:
+                device_holiday = DeviceHolidayFile(holiday=holiday, device=parent)
+                device_holidays.append(device_holiday)
+        device_holidays = DeviceHolidayFile.objects.bulk_create(device_holidays)
 # class HolidayDeviceInline(HolidayInline):
-#     inlines = [DeviceGroupFileInlineNonRelated, InheritDeviceGroupFilesPerHolidayInlineNested, DeviceFileInlineNonRelated]
+#     inlines = [GroupFileInlineNonRelated, InheritGroupFilesPerHolidayInlineNested, DeviceFileInlineNonRelated]
 #
 #     def get_form_queryset(self, obj):
 #         return self.model.objects.all().annotate(device_pk=Value(obj.pk, output_field=BigIntegerField())).annotate(devicegroup_pk=Value(obj.group.pk, output_field=BigIntegerField()))
 
 
-@admin.register(DeviceGroup)
-class DeviceGroupAdmin(NestedModelAdmin):
-    model = DeviceGroup
+@admin.register(Group)
+class GroupAdmin(NestedModelAdmin):
+    model = Group
     list_display = ('name', 'description')
-    inlines = [DeviceGroupHolidayInline]
+    inlines = [GroupHolidayInline]
     #readonly_fields = ('created_time', 'changed_time')
 
 
@@ -258,8 +321,9 @@ class DeviceGroupAdmin(NestedModelAdmin):
 class DeviceAdmin(NestedModelAdmin):
     list_display = ('sn', 'name', 'button', 'ip', 'active', 'created_time', 'config_time', 'device_config_time', 'reported_device_config_time', 'last_health_time')
     #fields = ('sn', 'name')
-    #inlines = [HolidayDeviceInline]#, DeviceFileInlineNonRelated]#[DeviceFileInline]#, FileInline]#, DeviceGroupInline]
+    #inlines = [HolidayDeviceInline] , DeviceFileInlineNonRelated]#[DeviceFileInline]#, FileInline]#, GroupInline]
     readonly_fields = ('created_time', 'changed_time', 'config_time', 'device_config_time', 'reported_device_config_time', 'last_health_time')
+    inlines = [DeviceHolidayInline]
 
     def get_urls(self):
         urls = super().get_urls()
