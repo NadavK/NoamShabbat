@@ -1,13 +1,6 @@
 from django.contrib import admin
-from django.contrib.admin import TabularInline, StackedInline
-from django.contrib.contenttypes.admin import GenericTabularInline
-from django.contrib.contenttypes.models import ContentType
-from django import forms
-from django.forms import ModelChoiceField
-
-from devices.models import Group, Device
-from library.models import File, DeviceFile, GroupFile, Holiday, InheritGroupFilesPerHoliday, \
-    GroupHolidayFile, DeviceHolidayFile
+from django.contrib.admin import StackedInline, TabularInline
+from library.models import File, DeviceFile, GroupFile, Holiday, GroupHoliday, DeviceHoliday
 
 
 class OnlySuperModelAdmin(admin.ModelAdmin):
@@ -34,29 +27,29 @@ class OnlySuperModelAdmin(admin.ModelAdmin):
 #         return obj.name
 
 
-class DeviceHolidayInline(StackedInline):
-    model = DeviceHolidayFile
-    fields = ('holiday',)
-    #readonly_fields = ('device', )
-    can_delete = False
+# class DeviceHolidayInline(StackedInline):
+#     model = DeviceHoliday
+#     fields = ('holiday',)
+#     #readonly_fields = ('device', )
+#     can_delete = False
 
 
-class GroupHolidayInline(StackedInline):
-    model = GroupHolidayFile
-    fields = ('holiday',)
-    #readonly_fields = ('group', )
-    can_delete = False
-
-    # list_display = ('pk', 'file', 'description', 'device_holiday__device', 'device_holiday__holiday', 'placement', 'active', 'deleted', 'created_time', 'changed_time')
-    # ordering = ('device_holiday__device', 'device_holiday__holiday', 'placement')
-
-    # @admin.display(description='בקר', ordering='device_holiday__device')
-    # def device_holiday__device(self, obj):
-    #     return obj.device_holiday.device.name
-    #
-    # @admin.display(description='חג', ordering='device_holiday__holiday')
-    # def device_holiday__holiday(self, obj):
-    #     return obj.device_holiday.holiday.name
+# class GroupHolidayInline(StackedInline):
+#     model = GroupHoliday
+#     fields = ('holiday',)
+#     #readonly_fields = ('group', )
+#     can_delete = False
+#
+#     # list_display = ('pk', 'file', 'description', 'device_holiday__device', 'device_holiday__holiday', 'placement', 'active', 'deleted', 'created_time', 'changed_time')
+#     # ordering = ('device_holiday__device', 'device_holiday__holiday', 'placement')
+#
+#     # @admin.display(description='בקר', ordering='device_holiday__device')
+#     # def device_holiday__device(self, obj):
+#     #     return obj.device_holiday.device.name
+#     #
+#     # @admin.display(description='חג', ordering='device_holiday__holiday')
+#     # def device_holiday__holiday(self, obj):
+#     #     return obj.device_holiday.holiday.name
 
 
 @admin.register(File)
@@ -78,15 +71,21 @@ class DeviceFileAdmin(OnlySuperModelAdmin):
         }
     list_display = ('pk', 'file', 'description', 'device_holiday__device', 'device_holiday__holiday', 'placement', 'active', 'deleted', 'created_time', 'changed_time')
     ordering = ('device_holiday__device', 'device_holiday__holiday', 'placement')
-    #inlines = [DeviceHolidayInline]
+    #readonly_fields = ('device_holiday',)
 
     @admin.display(description='בקר', ordering='device_holiday__device')
     def device_holiday__device(self, obj):
-        return obj.device_holiday.device.name
+        try:
+            return obj.device_holiday.device.name
+        except:
+            return 'Missing'
 
     @admin.display(description='חג', ordering='device_holiday__holiday')
     def device_holiday__holiday(self, obj):
-        return obj.device_holiday.holiday.name
+        try:
+            return obj.device_holiday.holiday.name
+        except:
+            return 'Missing'
 
 
 @admin.register(GroupFile)
@@ -97,8 +96,7 @@ class GroupFileAdmin(OnlySuperModelAdmin):
         }
     list_display = ('pk', 'file', 'description', 'group_holiday__group', 'group_holiday__holiday', 'placement', 'active', 'deleted', 'created_time', 'changed_time')
     ordering = ('group_holiday__group', 'group_holiday__holiday', 'placement')
-    #inlines = [GroupHolidayInline]
-    #readonly_fields = ('groupholiday__group',)
+    #readonly_fields = ('group_holiday',)
 
     @admin.display(description='קבוצה', ordering='group_holiday__group')
     def group_holiday__group(self, obj):
@@ -107,8 +105,6 @@ class GroupFileAdmin(OnlySuperModelAdmin):
     @admin.display(description='חג', ordering='group_holiday__holiday')
     def group_holiday__holiday(self, obj):
         return obj.group_holiday.holiday.name
-
-
 
     #readonly_fields = ('content_type', 'object_id')
     # form = FileAdmindForm  # <- ADDED FORM
@@ -119,19 +115,35 @@ class GroupFileAdmin(OnlySuperModelAdmin):
     #     return super(FileAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class DeviceFileInline(TabularInline):
+    model = DeviceFile
+    can_delete = False
+    extra = 1
 
-@admin.register(DeviceHolidayFile)
+
+@admin.register(DeviceHoliday)
 class DeviceHolidayAdmin(OnlySuperModelAdmin):
-    list_display = ('__str__', 'device', 'holiday')
+    list_display = ('__str__', 'device', 'holiday', 'has_file')
     ordering = ('device', 'holiday')
+    inlines = [DeviceFileInline]
+
+    @admin.display(description='קבצים', ordering='devicefile__file')
+    def has_file(self, obj):
+        return obj.devicefile_set.count()
 
 
-@admin.register(GroupHolidayFile)
+class GroupFileInline(TabularInline):
+    model = GroupFile
+    can_delete = False
+    extra = 1
+
+
+@admin.register(GroupHoliday)
 class GroupHolidayAdmin(OnlySuperModelAdmin):
-    list_display = ('__str__', 'group', 'holiday')
+    list_display = ('__str__', 'group', 'holiday', 'has_file')
     ordering = ('group', 'holiday')
+    inlines = [GroupFileInline]
 
-
-@admin.register(InheritGroupFilesPerHoliday)
-class DeviceFileAdmin(OnlySuperModelAdmin):
-    pass
+    @admin.display(description='קבצים', ordering='groupfile__file')
+    def has_file(self, obj):
+        return obj.groupfile_set.count()

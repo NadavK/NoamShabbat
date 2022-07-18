@@ -7,7 +7,7 @@ django-log-request-id==2.0.0
 django-mptt==0.13.4
 django-nested-admin==3.4.0
 #django-nested-inline==0.4.5
-#django-nonrelated-inlines==0.2
+django-nonrelated-inlines==0.2
 #django-polymorphic==3.1.0
 djangorestframework==3.13.1
 lxml==4.9.1

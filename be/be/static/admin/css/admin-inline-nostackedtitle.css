@@ -1,0 +1,28 @@
+/* Hide the main title for NestedStackedInline (hides the device/group-holiday title for DeviceHolidayInline and GroupHolidayInline)*/
+.inline-related h2, .inline-group h2 {
+    display: none;
+}
+
+/* Hide the per-record title for NestedStackedInline (hides the device/group-holiday title for DeviceHolidayInline and GroupHolidayInline)*/
+.inline-related h3 {
+    display: none;
+}
+
+/* Hide the label for NestedStackedInline (makes the holiday-field appear as a title for DeviceHolidayInline and GroupHolidayInline)*/
+.form-row.field-holiday_nolink .field-holiday_nolink label {
+    display: none;
+}
+
+/* Hide the "Add new" DeviceHolidayInline/GroupHolidayInline (at the bottom of the page) */
+.djn-module.djn-add-item.add-item.add-row {
+    display: none;
+}
+
+/* Set background color for GroupFiles within DeviceFile edit */
+tr[id^='deviceholiday_set-'] {
+/*deviceholiday_set-0-devices-groupfilenostr-0*/
+/*[class^="form-row has_original dynamic-deviceholiday_set-"][class$="-devices-groupfilenostr"] {*/
+/*.form-row.has_original.dynamic-deviceholiday_set-0-devices-groupfilenostr {*/
+    background: var(--hairline-color);
+    /*background: var(--darkened-bg);*/
+}

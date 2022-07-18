@@ -1,15 +1,13 @@
 .inline-related h3 {
-    padding-top: 0px;
     display: none;
 }
 
 .inline-related h2, .inline-group h2 {
-    padding-top: 0px;
     display: none;
 }
 
+/* Hide the title for NestedTabularInline */
 .inline-group thead th {
-    padding-top: 0px;
     display: none;
 }
 
