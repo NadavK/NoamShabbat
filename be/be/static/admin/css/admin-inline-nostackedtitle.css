@@ -18,11 +18,24 @@
     display: none;
 }
 
-/* Set background color for GroupFiles within DeviceFile edit */
+/* Set text and background color for GroupFiles within DeviceFile */
 tr[id^='deviceholiday_set-'] {
 /*deviceholiday_set-0-devices-groupfilenostr-0*/
 /*[class^="form-row has_original dynamic-deviceholiday_set-"][class$="-devices-groupfilenostr"] {*/
 /*.form-row.has_original.dynamic-deviceholiday_set-0-devices-groupfilenostr {*/
+/*[class^="deviceholiday_set-"][class$="-devices-groupfilenostr-empty"] {*/
+/*id="deviceholiday_set-0-devices-groupfilenostr-empty"*/
     background: var(--hairline-color);
     /*background: var(--darkened-bg);*/
+    color: grey
+}
+
+/* Need specific css to make the link fields grey for GroupFiles within DeviceFile*/
+tr[id^='deviceholiday_set-'] a {
+    color: grey
+}
+
+/* make the fields grey for GroupFiles within DeviceFile*/
+.module.make-text-grey th {
+    color: grey
 }

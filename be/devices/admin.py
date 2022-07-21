@@ -111,7 +111,7 @@ class GroupFileInlineNonRelated(NonrelatedTabularInline, NestedTabularInline):
     extra = 0
     exclude = ('group_holiday', 'deleted')
     readonly_fields = ['file', 'description', 'notes', 'placement', 'active']
-    classes = ['dark-background']       # Not used for anything
+    classes = ['make-text-grey']       # Used by css
 
     def get_form_queryset(self, obj):
         try:
@@ -130,27 +130,6 @@ class GroupFileInlineNonRelated(NonrelatedTabularInline, NestedTabularInline):
         return False
 
 
-# class InheritGroupFilesPerHolidayInlineNested(NestedStackedInline):
-#     model = InheritGroupFilesPerHoliday
-#     extra = 1
-#     max_num = 1
-#     exclude = ('device',)
-#
-#     def has_add_permission(self, request, obj=None):
-#         return True
-#
-#     def get_form_queryset(self, obj):
-#         return self.model.objects.filter(holiday=obj, device__pk=obj.device_pk)
-#
-#     def save_new_instance(self, parent, instance):
-#         # instance.email = parent.email
-#         pass
-
-
-# class HolidayInline(NestedStackedInline):
-#     model = GroupHoliday
-
-
 class HolidayInline(NestedStackedInline):
     model = Holiday
     exclude = ('name', 'english_name')
@@ -160,16 +139,7 @@ class HolidayInline(NestedStackedInline):
         return False
 
     def save_new_instance(self, parent, instance):
-        # instance.email = parent.email
         pass
-
-
-# # Used to hide the title and field prefix
-# class GroupHolidayNoTitle(GroupHoliday):
-#     class Meta:
-#         proxy = True
-#         verbose_name = ''
-#         verbose_name_plural = ''
 
 
 class GroupHolidayInline(NestedStackedInline):
