@@ -52,11 +52,6 @@ class OnlySuperModelAdmin(admin.ModelAdmin):
 #     #     return obj.device_holiday.holiday.name
 
 
-@admin.register(File)
-class FileAdmin(OnlySuperModelAdmin):
-    list_display = ('pk', 'file', 'description', 'placement', 'active', 'deleted', 'created_time', 'changed_time')
-
-
 @admin.register(Holiday)
 class HolidayAdmin(OnlySuperModelAdmin):
     list_display = ('name',)

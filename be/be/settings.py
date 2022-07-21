@@ -16,16 +16,45 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+# SECURITY WARNING: don't run with debug turned on in production!
+# set via: sudo nano /etc/environment
+DEBUG = os.environ.get('DEBUG', 'true') != 'false'
+
+# ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+# ▼▼▼▼▼▼   SECURITY DEFINITIONS - OVERRIDE THE BELOW SETTINGS FOR YOUR SPECIFIC DEPLOYMENT; DO NOT SHARE WITH ANYONE   ▼▼▼▼▼▼
+# ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-jmq4ok9$*s_#4d@d5*sl9h-8z7%z0t_+&mev3*wky_9*#8x#=p'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace_with_actual_secret')
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'yourdomain.com', ]
+CSRF_TRUSTED_ORIGINS = ['https://*.yourdomain.com', 'https://*.127.0.0.1']
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost', 'http://localhost:8000', 'http://localhost:8100', 'http://localhost:8101', 'https://yourdomain.com')      # This value should not contain a trailing dash, but calling url does require a trailing dash
+#ADMINS = [('Admin', 'admin@yourdomain.com'), ]
+#MANAGERS = ADMINS
 
-ALLOWED_HOSTS = []
+# Be sure to setup your email backend with all relevant configuration
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# ASTRAL_LOCATION_INFOS = """raanana_wiki,48,Asia/Jerusalem,32°11'N,34°52'E
+#     raanana_google,44,Asia/Jerusalem,32°18'N,34°87'E"""
+# LOCATION = 'raanana_wiki'
+
+try:
+    # A good practice is to keep all the secret data in a separate file
+    from be.secret.settings_secret import *
+except:
+    pass
+# ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+# ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲     End of Security definitions     ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+# ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 
 # Application definition
@@ -37,8 +66,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'gdstorage',
     'rest_framework',
-    #'nested_inline',
     'nested_admin',
     'noambe.apps.NoambeConfig',
     'cabinet', 'imagefield',
